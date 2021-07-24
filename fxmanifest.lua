@@ -8,3 +8,6 @@ client_scripts {
     'main.lua',
     'example.lua'
 }
+dependencies {
+    'tweenCFX'
+}
