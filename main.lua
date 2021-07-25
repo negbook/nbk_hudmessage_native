@@ -14,11 +14,14 @@ end
 local hudmessage_handle = 0
 local hudmessage_handles = {}
 
-function OnDrawFinish(object,handle)
+function OnDrawFinish(object,handle,cb)
     hudmessage_handles[handle] = nil
+    if cb then 
+        cb(object)
+    end
 end 
 
-RegisterNetEvent('hudmessage', function(text,xper,yper,scale,durationIn,durationHold,durationOut)
+RegisterNetEvent('hudmessage', function(text,xper,yper,scale,durationIn,durationHold,durationOut,cb)
     local object = {}
     object._text = text
     object._x = xper
@@ -34,12 +37,12 @@ RegisterNetEvent('hudmessage', function(text,xper,yper,scale,durationIn,duration
     if hudmessage_handle > 65530 then hudmessage_handle = 0 end 
     hudmessage_handle = hudmessage_handle + 1
     hudmessage_handles[hudmessage_handle] = true 
-    TweenCFX.Tween.to(object,durationIn,{_alpha=255,ease=TweenCFX.Ease.LinearNone,onCompleteScope=function(object,hudmessage_handle)
-        TweenCFX.Tween.delayCall(object,durationHold,{_alpha=0,ease=TweenCFX.Ease.LinearNone,onCompleteScope=function(object,hudmessage_handle)
-            TweenCFX.Tween.to(object,durationOut,{_alpha=0,ease=TweenCFX.Ease.LinearNone,onCompleteScope=OnDrawFinish,onCompleteArgs={object,hudmessage_handle}})
-        end ,onCompleteArgs={object,hudmessage_handle}})
+    TweenCFX.Tween.to(object,durationIn,{_alpha=255,ease=TweenCFX.Ease.LinearNone,onCompleteScope=function(object,hudmessage_handle,cb)
+        TweenCFX.Tween.delayCall(object,durationHold,{_alpha=0,ease=TweenCFX.Ease.LinearNone,onCompleteScope=function(object,hudmessage_handle,cb)
+            TweenCFX.Tween.to(object,durationOut,{_alpha=0,ease=TweenCFX.Ease.LinearNone,onCompleteScope=OnDrawFinish,onCompleteArgs={object,hudmessage_handle,cb}})
+        end ,onCompleteArgs={object,hudmessage_handle,cb}})
         
-    end ,onCompleteArgs={object,hudmessage_handle}})
+    end ,onCompleteArgs={object,hudmessage_handle,cb}})
     
     CreateThread(function()
         hudmessage_handles[hudmessage_handle] = true 
